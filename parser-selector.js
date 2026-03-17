@@ -5,11 +5,8 @@
     var STORAGE_ACTIVE  = 'ps_active';
 
     var DEFAULT_PARSERS = [
-        { name: 'jac.red',       url: 'jac.red',          apikey: '', type: 'jackett' },
-        { name: 'jr.maxvol.pro', url: 'jr.maxvol.pro',    apikey: '', type: 'jackett' },
-        { name: 'jacblack.ru',   url: 'jacblack.ru:9117', apikey: '', type: 'jackett' },
-        { name: 'jac-red.ru',    url: 'jac-red.ru',       apikey: '', type: 'jackett' },
-        { name: 'jacred.stream', url: 'jacred.stream',    apikey: 'pp', type: 'jackett' },
+        { name: 'NovaNet Jacred',       url: 'http://jacred.mooo.com:888',          apikey: '', type: 'jackett' },
+        { name: 'NovaNet Jackett', url: 'http://jackett.pro.mooo.com:889    apikey: 'lampac2025', type: 'jackett' },
     ];
 
     // -----------------------------------------------------------------------
