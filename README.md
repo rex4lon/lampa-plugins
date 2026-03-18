@@ -74,17 +74,15 @@
 
 ---
 
-#### `maxsm_ratings_mod.js` в вручную надо редактировать и перезаливать, ключ вставить від можно использовать одиночный ключ или массив ключей, после получения API ключей передайте их как массивы через:
-    window.RATINGS_PLUGIN_TOKENS && window.RATINGS_PLUGIN_TOKENS.OMDB_API_KEYS
-Или просто введите ниже в коде плагина:
-    var OMDB_API_KEYS = (window.RATINGS_PLUGIN_TOKENS && window.RATINGS_PLUGIN_TOKENS.OMDB_API_KEYS) || ['YOU_KEY']; // api ключи массивом
-    var KP_API_KEYS   = (window.RATINGS_PLUGIN_TOKENS && window.RATINGS_PLUGIN_TOKENS.KP_API_KEYS)   || ['YOU_KEY']; // api ключи массивом
+#### `maxsm_ratings_mod.js` УВАГА (обов’язково прочитати перед використанням):
 
-Для получения данных о качестве используется jacred парсер, по умолчанию плагин настроен на получение адреса и ключа вашего введеного jacred,
-вы можете изменить это в переменных:
-    var JACRED_PROTOCOL = 'https://'; // Протокол JacRed
-    var JACRED_URL = Lampa.Storage.get('jackett_url'); // Адрес JacRed для получения информации о карточках без протокола (jacred.xyz)
-    var JACRED_API_KEY = Lampa.Storage.get('jackett_key'); // api ключ JacRed
+Плагін не працює «з коробки» — треба відкрити в редакторі, вписати свої API‑ключі та перезалити файл на хостинг.
+
+OMDb (IMDb/Metacritic/Rotten Tomatoes) + KinoPoisk API — ключі передаються або через window.RATINGS_PLUGIN_TOKENS чи напряму в коді.
+
+Jacred для якості релізів — за замовчуванням бере з налаштувань Lampa, але для кастомного сервера треба редагувати змінні в коді.
+
+Після редагування ключів — збережіть і перезалийте оновлений .js файл.
 
 [https://rex4lon.github.io/maxsm_ratings_mod.js](https://rex4lon.github.io/maxsm_ratings_mod.js)
 
