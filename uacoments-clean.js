@@ -238,7 +238,7 @@
     };
 
     var proxies =[
-        'https://cors.lampa.stream/',
+        'https://apn-oakline.xyz',
         'https://cors.eu.org/',
         'https://corsproxy.io/?url='
     ];
