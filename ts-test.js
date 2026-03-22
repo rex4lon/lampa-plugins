@@ -54,20 +54,7 @@
   }
 
   const _hide = () => {
-    // основное поле torrserver_url — НЕ трогаем
     $('div[data-name="torrserver_url_two"]').hide();
-    $('div[data-name="torrserver_use_link"]').hide();
-    $('div.settings-param__name:contains("Посилання")').closest('.settings-param').hide();
-    $('.selectbox-item.selector > div').each(function () {
-      const txt = $(this).text();
-      if (/\d{1,3}\.\d{1,3}\.\d{1,3}/.test(txt) || txt === 'NotFound') {
-        $(this).parent().hide();
-      }
-    });
-    $('.selectbox-item.selector').each(function () {
-      const idx = parseInt($(this).data('value')) - 1;
-      if (!isNaN(idx) && !Lampa.Storage.get(`_fs${idx}`)) $(this).hide();
-    });
   };
 
   setInterval(_hide, 150);
