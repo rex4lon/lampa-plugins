@@ -17,6 +17,7 @@
 
   const _d = (s) => atob(s);
 
+  // в select только нумерация, без адресов
   const labels = _s.reduce((acc, _, i) => {
     acc[i + 1] = `Сервер ${i + 1}`;
     return acc;
@@ -54,7 +55,21 @@
   }
 
   const _hide = () => {
+    // скрываем только поле с реальным адресом
     $('div[data-name="torrserver_url_two"]').hide();
+
+    // если в selectbox вдруг просочился IP — заменяем на номер
+    $('.selectbox-item.selector').each(function () {
+      const val = parseInt($(this).data('value'));
+      if (!isNaN(val) && val >= 1 && val <= _s.length) {
+        const txt = $(this).find('div').text();
+        if (/\d{1,3}\.\d{1,3}\.\d{1,3}/.test(txt)) {
+          $(this).find('div').text(`Сервер ${val}`);
+        }
+        // скрываем мёртвые серверы
+        if (!Lampa.Storage.get(`_fs${val - 1}`)) $(this).hide();
+      }
+    });
   };
 
   setInterval(_hide, 150);
