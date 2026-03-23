@@ -166,7 +166,6 @@
           btn.on('hover:enter hover:click hover:touch', function () {
             $('.modal').remove();
             _applyServer(true);
-            Lampa.Activity.active('content');
           });
         }
       });
@@ -174,4 +173,135 @@
     observer.observe(document.body, { childList: true, subtree: true });
   }
 
-  // ─── НАСТРОЙКИ
+  // ─── НАСТРОЙКИ ────────────────────────────────────────────────────────────
+
+  // 1. Free TorrServer — главный блок
+  Lampa.SettingsApi.addParam({
+    component: 'server',
+    param: {
+      name:    'torrserv',
+      type:    'select',
+      values:  { 0: 'Свой вариант', 1: 'Автовыбор' },
+      default: 1
+    },
+    field: {
+      name:        _fieldName,
+      description: 'Нажмите для смены сервера'
+    },
+    onChange: function (value) {
+      if (value == '0') {
+        Lampa.Storage.set('torrserver_use_link', 'one');
+        Lampa.Storage.set('torrserver_url_two', '');
+        _hiddenMode();
+        Lampa.Settings.update();
+        return;
+      }
+      if (value == '1') {
+        Lampa.Storage.set('torrserver_use_link', 'two');
+        _applyServer(true);
+        _updateButtonMode();
+        Lampa.Settings.update();
+        return;
+      }
+    },
+    onRender: function (item) {
+      item.hide();
+      setTimeout(function () {
+        $('._fts-torrserv').remove();
+        item.addClass('_fts-torrserv');
+        item.prependTo(item.parent());
+        item.show();
+        $('.settings-param__name', item).css('color', '#ffffff');
+        if (Lampa.Storage.field('torrserv') == '1') {
+          $('div[data-name="torrserver_url_two"]').hide();
+          $('div[data-name="torrserver_url"]').hide();
+          $('div[data-name="torrserver_use_link"]').hide();
+        }
+        if (Lampa.Storage.field('torrserv') == '0') {
+          $('div[data-name="torrserver_url_two"]').hide();
+          $('div[data-name="torrserver_use_link"]').hide();
+          $('div[data-name="switch_server_button"]').hide();
+          $('._fts-speed').hide();
+        }
+      }, 0);
+    }
+  });
+
+  // 2. Кнопка для смены сервера
+  Lampa.SettingsApi.addParam({
+    component: 'server',
+    param: {
+      name:    'switch_server_button',
+      type:    'select',
+      values:  { 1: 'Не показывать', 2: 'Показывать только в торрентах', 3: 'Показывать всегда' },
+      default: '2'
+    },
+    field: {
+      name:        'Кнопка для смены сервера',
+      description: 'Параметр включает отображение кнопки в верхнем баре для быстрой смены сервера'
+    },
+    onChange: function () { _updateButtonMode(); },
+    onRender: function (item) {
+      item.hide();
+      setTimeout(function () {
+        $('._fts-swbtn').remove();
+        item.addClass('_fts-swbtn');
+        item.insertAfter('div[data-name="torrserver_url"]');
+        item.show();
+
+        // Убрать все дубли кнопки теста
+        $('div[data-name="torrserv_speed_test"]').remove();
+        $('._fts-speed').remove();
+
+        // Вставить одну кнопку теста скорости
+        var speedBtn = $('<div class="settings-param selector _fts-speed"><div class="settings-param__name">Тестувати швидкість</div></div>');
+        speedBtn.on('hover:enter hover:click hover:touch', function () { _testSpeed(); });
+        item.after(speedBtn);
+      }, 0);
+    }
+  });
+
+  // 3. Регистрируем torrserv_speed_test — сразу скрываем (реальная кнопка вставлена выше)
+  Lampa.SettingsApi.addParam({
+    component: 'server',
+    param: { name: 'torrserv_speed_test', type: 'button' },
+    field: { name: 'Тестувати швидкість', description: '' },
+    onClick: function () { _testSpeed(); },
+    onRender: function (item) {
+      item.remove();
+    }
+  });
+
+  // ─── СТАРТ ────────────────────────────────────────────────────────────────
+  var _wait = setInterval(function () {
+    if (typeof Lampa !== 'undefined') {
+      clearInterval(_wait);
+      _boot();
+    }
+  }, 200);
+
+  function _boot() {
+    if (localStorage.getItem('torrserv') === null) {
+      Lampa.Storage.set('torrserv', '1');
+    }
+    if (localStorage.getItem('switch_server_button') === null) {
+      Lampa.Storage.set('switch_server_button', '2');
+    }
+
+    if (Lampa.Platform.is('android')) {
+      Lampa.Storage.set('internal_torrclient', true);
+    }
+
+    _startErrorObserver();
+  }
+
+  // ─── КНОПКА ПОСЛЕ ЗАГРУЗКИ APP ───────────────────────────────────────────
+  if (window.appready) {
+    _initButton();
+  } else {
+    Lampa.Listener.follow('app', function (e) {
+      if (e.type == 'ready') _initButton();
+    });
+  }
+
+})();
