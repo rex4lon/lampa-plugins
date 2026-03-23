@@ -23,7 +23,7 @@
     var KEY_USELINK = 'torrserveruselink';
 
     // ─────────────────────────────────────────────────────────────────────────
-    //  SVG ИКОНКА СЕРВЕРА
+    //  SVG ИКОНКА
     // ─────────────────────────────────────────────────────────────────────────
     var SVG_ICON = '<svg version="1.1" xmlns="http://www.w3.org/2000/svg"'
         + ' xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512"'
@@ -161,7 +161,7 @@
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    //  ИКОНКА В НАСТРОЙКАХ
+    //  НАСТРОЙКИ
     // ─────────────────────────────────────────────────────────────────────────
     function buildSettingsIconHtml() {
         return '<div class="settings-folder" style="padding:0!important">'
@@ -175,13 +175,10 @@
             + '</div></div></div></div>';
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    //  РЕГИСТРАЦИЯ НАСТРОЕК
-    // ─────────────────────────────────────────────────────────────────────────
     function buildSelectValues() {
         var obj = {};
         SERVERS.forEach(function (url, i) {
-            obj[i] = 'TS ' + (i + 1) + '  —  ' + url.replace('http://', '');
+            obj[i] = 'TS ' + (i + 1) + '  \u2014  ' + url.replace('http://', '');
         });
         return obj;
     }
@@ -250,7 +247,7 @@
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    //  MUTATIONOBSERVER — АВТОПЕРЕВОД НОВЫХ DOM-УЗЛОВ
+    //  MUTATIONOBSERVER — АВТОПЕРЕВОД
     // ─────────────────────────────────────────────────────────────────────────
     function startObserver() {
         if (typeof MutationObserver === 'undefined') return;
@@ -259,8 +256,7 @@
                 var added = mutations[i].addedNodes;
                 for (var j = 0; j < added.length; j++) {
                     var node = added[j];
-                    if (node.nodeType !== 1) continue;
-                    if (!node.querySelectorAll) continue;
+                    if (node.nodeType !== 1 || !node.querySelectorAll) continue;
                     node.querySelectorAll('.settings-param__name').forEach(function (el) {
                         if (Lampa.Lang && Lampa.Lang.translate) {
                             var t = Lampa.Lang.translate(el.textContent.trim());
@@ -277,7 +273,7 @@
     //  ИНИЦИАЛИЗАЦИЯ
     // ─────────────────────────────────────────────────────────────────────────
     function init() {
-        // Дефолты при первом запуске
+        // Дефолты хранилища
         if (Lampa.Storage.get(KEY_IDX) === null || Lampa.Storage.get(KEY_IDX) === undefined) {
             setIdx(0);
         }
@@ -286,28 +282,42 @@
             _lsSet(KEY_URL, SERVERS[getIdx()]);
         }
 
-        // Регистрация плагина
-        if (Lampa.Manifest) {
-            Lampa.Manifest.field({
-                name:        'TorrServer Public',
-                description: 'Публичные TorrServer серверы',
-                component:   COMP_ID
-            });
+        // Manifest — безопасный вызов с перебором вариантов API
+        try {
+            if (Lampa.Manifest && typeof Lampa.Manifest.field === 'function') {
+                Lampa.Manifest.field({
+                    name:        'TorrServer Public',
+                    description: 'Публичные TorrServer серверы',
+                    component:   COMP_ID
+                });
+            } else if (Lampa.Manifest && typeof Lampa.Manifest.plugins === 'function') {
+                Lampa.Manifest.plugins({
+                    name:      'TorrServer Public',
+                    component: COMP_ID
+                });
+            } else if (Lampa.Manifest && typeof Lampa.Manifest.add === 'function') {
+                Lampa.Manifest.add({
+                    name:      'TorrServer Public',
+                    component: COMP_ID
+                });
+            }
+        } catch (e) {
+            console.warn('[TorrServer Public] Manifest skipped:', e.message);
         }
 
         registerSettings();
 
-        // После загрузки приложения — вставить кнопку в шапку
+        // Кнопка в шапке после app:ready
         Lampa.Listener.follow('app', function (e) {
             if (e.type === 'ready') {
                 setTimeout(injectSwitchBtn, 400);
             }
         });
 
-        // Слушатель активити — показ/скрытие кнопки
+        // Показ/скрытие кнопки при смене экрана
         Lampa.Listener.follow('activity', onActivityChange);
 
-        // Синхронизация при программной смене KEY_IDX
+        // Синхронизация Storage → localStorage
         Lampa.Storage.listener.follow(KEY_IDX, function (val) {
             var idx = parseInt(val, 10);
             if (!isNaN(idx) && idx >= 0 && idx < SERVERS.length) {
@@ -321,11 +331,10 @@
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    //  ОЖИДАНИЕ LAMPA
+    //  ОЖИДАНИЕ LAMPA (Manifest намеренно исключён из условия)
     // ─────────────────────────────────────────────────────────────────────────
     var _wait = setInterval(function () {
         if (typeof Lampa !== 'undefined'
-            && Lampa.Manifest
             && Lampa.SettingsApi
             && Lampa.Storage
             && Lampa.Listener
