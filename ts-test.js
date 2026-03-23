@@ -20,24 +20,46 @@
     '<div style="line-height: 0.3;">Free TorrServer</div>' +
     '</div></div></div></div>';
 
-  // ─── Смена сервера: оригинальный endpoint, без проверки bylampa ──────────
+  // ─── Список серверов ─────────────────────────────────────────────────────
+  var SERVERS = [
+    '185.235.218.109:8090',
+    '95.174.93.5:8090',
+    '77.110.122.115:8090',
+    '77.238.228.41:8290',
+    '91.192.105.69:8090',
+    '195.64.231.192:8090',
+    '193.228.128.112/ts',
+    '31.129.234.181/ts',
+    '78.40.195.218:9118/ts',
+    '45.144.53.25:37940'
+  ];
+
+  // ─── Смена сервера: перебор своих серверов через /echo ───────────────────
   function changeServer() {
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', 'http://185.87.48.42:8090/random_torr', true);
-    xhr.onload = function () {
-      if (xhr.status === 200) {
-        var ip = xhr.responseText;
-        Lampa.Storage.set('torrserver_url_two', 'http://' + ip + ':8090');
-      } else {
-        console.error('Ошибка при получении IP-адреса:', xhr.status);
+    var shuffled = SERVERS.slice().sort(function () { return Math.random() - 0.5; });
+    var i = 0;
+    function tryNext() {
+      if (i >= shuffled.length) {
+        console.error('Ошибка при получении IP-адреса:');
         Lampa.Noty.show('Ошибка запроса');
+        return;
       }
-    };
-    xhr.onerror = function () {
-      console.error('Ошибка при получении IP-адреса:', xhr.status);
-      Lampa.Noty.show('Ошибка запроса');
-    };
-    xhr.send();
+      var url = shuffled[i++];
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', 'http://' + url + '/echo', true);
+      xhr.timeout = 4000;
+      xhr.onload = function () {
+        if (xhr.status === 200) {
+          Lampa.Storage.set('torrserver_url_two', 'http://' + url);
+        } else {
+          tryNext();
+        }
+      };
+      xhr.onerror = function () { tryNext(); };
+      xhr.ontimeout = function () { tryNext(); };
+      xhr.send();
+    }
+    tryNext();
   }
 
   // ─── Режимы кнопки ───────────────────────────────────────────────────────
