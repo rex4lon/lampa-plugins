@@ -207,7 +207,8 @@
     onRender: function (item) {
       item.hide();
       setTimeout(function () {
-        $('._fts-torrserv').remove();
+        $('div[data-name="torrserv"]').not('._fts-torrserv').remove();
+        $('._fts-torrserv').not(item).remove();
         item.addClass('_fts-torrserv');
         item.prependTo(item.parent());
         item.show();
@@ -250,7 +251,7 @@
         item.show();
       }, 0);
 
-      // 400мс — оригинальный плагин успевает отрендерить свою кнопку, потом убираем её
+      // 400мс — ждём пока оригинальный плагин отрендерит свою кнопку, потом убираем
       setTimeout(function () {
         $('div[data-name="torrserv_speed_test"]').remove();
         $('._fts-speed').remove();
