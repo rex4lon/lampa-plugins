@@ -248,27 +248,17 @@
         item.addClass('_fts-swbtn');
         item.insertAfter('div[data-name="torrserver_url"]');
         item.show();
+      }, 0);
 
-        // Убрать все дубли кнопки теста
+      // 400мс — оригинальный плагин успевает отрендерить свою кнопку, потом убираем её
+      setTimeout(function () {
         $('div[data-name="torrserv_speed_test"]').remove();
         $('._fts-speed').remove();
 
-        // Вставить одну кнопку теста скорости
         var speedBtn = $('<div class="settings-param selector _fts-speed"><div class="settings-param__name">Тестувати швидкість</div></div>');
         speedBtn.on('hover:enter hover:click hover:touch', function () { _testSpeed(); });
-        item.after(speedBtn);
-      }, 0);
-    }
-  });
-
-  // 3. Регистрируем torrserv_speed_test — сразу скрываем (реальная кнопка вставлена выше)
-  Lampa.SettingsApi.addParam({
-    component: 'server',
-    param: { name: 'torrserv_speed_test', type: 'button' },
-    field: { name: 'Тестувати швидкість', description: '' },
-    onClick: function () { _testSpeed(); },
-    onRender: function (item) {
-      item.remove();
+        $('._fts-swbtn').after(speedBtn);
+      }, 400);
     }
   });
 
