@@ -1,22 +1,25 @@
 (function () {
   'use strict';
 
+  // ─── ЗАЩИТА ОТ ДВОЙНОЙ ЗАГРУЗКИ ──────────────────────────────────────────
+  if (window._freeTorrServerLoaded) return;
+  window._freeTorrServerLoaded = true;
+
   Lampa.Platform.tv();
 
-  // ─── СЕРВЕРЫ (base64) ────────────────────────────────────────────────────
-  var _s = [
-    'MTg1LjIzNS4yMTguMTA5OjgwOTA=',  // 185.235.218.109:8090
-    'OTUuMTc0LjkzLjU6ODA5MA==',       // 95.174.93.5:8090
-    'NzcuMTEwLjEyMi4xMTU6ODA5MA==',   // 77.110.122.115:8090
-    'NzcuMjM4LjIyOC40MTo4Mjkw',       // 77.238.228.41:8290
-    'OTEuMTkyLjEwNS42OTo4MDkw',       // 91.192.105.69:8090
-    'MTk1LjY0LjIzMS4xOTI6ODA5MA==',   // 195.64.231.192:8090
-    'MTkzLjIyOC4xMjguMTEyL3Rz',       // 193.228.128.112/ts
-    'MzEuMTI5LjIzNC4xODEvdHM=',       // 31.129.234.181/ts
-    'NzguNDAuMTk1LjIxODo5MTE4L3Rz',   // 78.40.195.218:9118/ts
-    'NDUuMTQ0LjUzLjI1OjM3OTQw'        // 45.144.53.25:37940
+  // ─── СЕРВЕРЫ ─────────────────────────────────────────────────────────────
+  var SERVERS = [
+    '185.235.218.109:8090',
+    '95.174.93.5:8090',
+    '77.110.122.115:8090',
+    '77.238.228.41:8290',
+    '91.192.105.69:8090',
+    '195.64.231.192:8090',
+    '193.228.128.112/ts',
+    '31.129.234.181/ts',
+    '78.40.195.218:9118/ts',
+    '45.144.53.25:37940'
   ];
-  var _d = function (s) { return atob(s); };
 
   // ─── SVG ИКОНКА ──────────────────────────────────────────────────────────
   var _icon = '<svg version="1.1" id="_x36_" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512" xml:space="preserve" fill="currentColor"><g id="SVGRepo_iconCarrier"><g><g><g>'
@@ -53,9 +56,9 @@
 
   // ─── ВЫБОР ЖИВОГО СЕРВЕРА ─────────────────────────────────────────────────
   async function _pickServer() {
-    var shuffled = _s.slice().sort(function () { return Math.random() - 0.5; });
+    var shuffled = SERVERS.slice().sort(function () { return Math.random() - 0.5; });
     for (var i = 0; i < shuffled.length; i++) {
-      var url = _d(shuffled[i]);
+      var url = shuffled[i];
       try {
         var ctrl = new AbortController();
         var t = setTimeout(function () { ctrl.abort(); }, 4000);
@@ -82,10 +85,7 @@
   // ─── ТЕСТ СКОРОСТИ ───────────────────────────────────────────────────────
   async function _testSpeed() {
     var baseUrl = Lampa.Storage.get('torrserver_url_two') || Lampa.Storage.get('torrserver_url') || '';
-    if (!baseUrl) {
-      Lampa.Noty.show('Сервер не задан');
-      return;
-    }
+    if (!baseUrl) { Lampa.Noty.show('Сервер не задан'); return; }
     Lampa.Noty.show('Тестирование...');
     var start = Date.now();
     try {
@@ -94,8 +94,7 @@
       var res = await fetch(baseUrl + '/echo', { signal: ctrl.signal });
       clearTimeout(t);
       if (res.ok) {
-        var ms = Date.now() - start;
-        Lampa.Noty.show('Пинг: ' + ms + ' мс — ' + baseUrl.replace('http://', ''));
+        Lampa.Noty.show('Пинг: ' + (Date.now() - start) + ' мс — ' + baseUrl.replace('http://', ''));
       } else {
         Lampa.Noty.show('Сервер не отвечает');
       }
@@ -136,6 +135,7 @@
 
   // ─── КНОПКА В ШАПКЕ ──────────────────────────────────────────────────────
   function _initButton() {
+    if ($('#SWITCH_SERVER').length) return;
     var btnHtml = '<div id="SWITCH_SERVER" class="head__action selector switch-screen">' + _icon + '</div>';
     $('#app > div.head > div > div.head__actions').append(btnHtml);
     $('#SWITCH_SERVER').insertAfter('div[class="head__action selector open--settings"]');
@@ -177,7 +177,7 @@
 
   // ─── НАСТРОЙКИ ────────────────────────────────────────────────────────────
 
-  // 1. Free TorrServer — главный переключатель
+  // 1. Free TorrServer — главный блок (вверху)
   Lampa.SettingsApi.addParam({
     component: 'server',
     param: {
@@ -208,15 +208,17 @@
     },
     onRender: function (item) {
       setTimeout(function () {
-        if ($('div[data-name="torrserv"]').length > 1) item.hide();
+        var all = $('div[data-name="torrserv"]');
+        if (all.length > 1) { item.hide(); return; }
+
+        // Переставить в самый верх
+        item.prependTo(item.parent());
         $('.settings-param__name', item).css('color', '#ffffff');
 
         if (Lampa.Storage.field('torrserv') == '1') {
           $('div[data-name="torrserver_url_two"]').hide();
           $('div[data-name="torrserver_url"]').hide();
           $('div[data-name="torrserver_use_link"]').hide();
-          $('div > span:contains("Ссылки")').remove();
-          $('div > span:contains("Посилання")').remove();
         }
         if (Lampa.Storage.field('torrserv') == '0') {
           $('div[data-name="torrserver_url_two"]').hide();
@@ -224,7 +226,7 @@
           $('div[data-name="switch_server_button"]').hide();
           $('div[data-name="torrserv_speed_test"]').hide();
         }
-      }, 0);
+      }, 100);
     }
   });
 
@@ -242,10 +244,11 @@
       description: 'Параметр включает отображение кнопки в верхнем баре для быстрой смены сервера'
     },
     onChange: function () { _updateButtonMode(); },
-    onRender: function () {
+    onRender: function (item) {
       setTimeout(function () {
-        $('div[data-name="switch_server_button"]').insertAfter('div[data-name="torrserver_url"]');
-      }, 0);
+        if ($('div[data-name="switch_server_button"]').length > 1) { item.hide(); return; }
+        item.insertAfter('div[data-name="torrserver_url"]');
+      }, 100);
     }
   });
 
@@ -260,13 +263,12 @@
       name:        'Тестувати швидкість',
       description: ''
     },
-    onClick: function () {
-      _testSpeed();
-    },
-    onRender: function () {
+    onClick: function () { _testSpeed(); },
+    onRender: function (item) {
       setTimeout(function () {
-        $('div[data-name="torrserv_speed_test"]').insertAfter('div[data-name="switch_server_button"]');
-      }, 0);
+        if ($('div[data-name="torrserv_speed_test"]').length > 1) { item.hide(); return; }
+        item.insertAfter('div[data-name="switch_server_button"]');
+      }, 100);
     }
   });
 
