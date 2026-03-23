@@ -70,7 +70,7 @@
   }
 
   // ─── ПРИМЕНИТЬ СЕРВЕР ─────────────────────────────────────────────────────
-  // notify: true  → "TorrServer изменён" (ручное переключение)
+  // notify: true  → "TorrServer изменён" (ручное)
   // notify: false → тихо (автостарт), уведомление только при ошибке
   async function _applyServer(notify) {
     var url = await _pickServer();
@@ -210,7 +210,8 @@
     onRender: function (item) {
       item.hide();
       setTimeout(function () {
-        if ($('div[data-name="torrserv"]').length > 1) return;
+        // Удалить старые копии от предыдущего рендера
+        $('div[data-name="torrserv"]').not(item[0]).remove();
         item.prependTo(item.parent());
         item.show();
         $('.settings-param__name', item).css('color', '#ffffff');
@@ -246,7 +247,7 @@
     onRender: function (item) {
       item.hide();
       setTimeout(function () {
-        if ($('div[data-name="switch_server_button"]').length > 1) return;
+        $('div[data-name="switch_server_button"]').not(item[0]).remove();
         item.insertAfter('div[data-name="torrserver_url"]');
         item.show();
       }, 0);
@@ -268,7 +269,7 @@
     onRender: function (item) {
       item.hide();
       setTimeout(function () {
-        if ($('div[data-name="torrserv_speed_test"]').length > 1) return;
+        $('div[data-name="torrserv_speed_test"]').not(item[0]).remove();
         item.insertAfter('div[data-name="switch_server_button"]');
         item.show();
       }, 0);
