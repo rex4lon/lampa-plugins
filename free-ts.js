@@ -24,8 +24,11 @@
 function changeServer() {
 var xhr = new XMLHttpRequest();
 
-xhr.open('GET', 'https://snowy-morning-0585.velr3on.workers.dev/random_torr', true);
-xhr.setRequestHeader('x-api-key', 'tsk_live_b7Qx9L2pZr8VdK4mN6sF1HcT');
+xhr.open(
+  'GET',
+  'https://snowy-morning-0585.velr3on.workers.dev/random_torr?token=tsk_live_b7Qx9L2pZr8VdK4mN6sF1HcT',
+  true
+);
 xhr.timeout = 4000;
 
 xhr.onload = function () {
