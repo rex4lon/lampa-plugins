@@ -60,7 +60,7 @@
                     type: 'select', 
                     values: {
                         '': 'Не вибрано',
-                        'http://framo.fun': 'Novanetua'
+                        'http://framo.fun': '👑NovaNetUA (Підписка)'
                     },
                     default: 'http://framo.fun'
                 },
