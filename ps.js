@@ -6,7 +6,7 @@
 
     var DEFAULT_PARSERS = [
         { name: 'NovaNet Jacred',       url: 'jacred.stream',          apikey: 'pp', type: 'jackett' },
-        { name: 'NovaNet Jackett',      url: 'jackett.pro.mooo.com:888',     apikey: 'jk-novanetua', type: 'jackett' },
+        { name: 'NovaNet Jackett',      url: 'jackett.pro.mooo.com:888',     apikey: 'jac-novanetua', type: 'jackett' },
     ];
 
     // -----------------------------------------------------------------------
