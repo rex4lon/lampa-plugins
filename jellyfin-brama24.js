@@ -10,8 +10,8 @@
   var HUB_COMPONENT = STORAGE_PREFIX + 'Hub';
   var HUB_PREVIEW_LIMIT = 12;
 
-  var DEFAULT_URL = '';
-  var DEFAULT_API_KEY = '';
+  var DEFAULT_URL = 'https://jellyfin.brama24.xyz';
+  var DEFAULT_API_KEY = '5e4460c827734aa59ccb03a2baafa7f8';
 
   var HTTP_TIMEOUT_MS = 15000;
   var TMDB_TIMEOUT_MS = 10000;
